@@ -1,0 +1,30 @@
+services:
+  # 1. Metadata Database
+  metastore-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: metastore_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 2324
+
+  # 2. Hive Metastore (HMS)
+  hive-metastore:
+    image: apache/hive:4.0.0
+    container_name: hive-metastore
+    depends_on:
+      - metastore-db
+    environment:
+      SERVICE_NAME: "metastore"
+      DB_DRIVER: "postgres"
+      # Connection to the Postgres DB above
+      SERVICE_OPTS: >-
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://metastore-db:5432/metastore_db
+        -Djavax.jdo.option.ConnectionUserName=postgres
+        -Djavax.jdo.option.ConnectionPassword=2324
+    ports:
+      - "9083:9083"
+    volumes:
+      # You must provide the Postgres JDBC driver to the hive libs
+      # Or use a volume to persist the warehouse if not using S3/MinIO for all metadata
+      - ./lib/postgresql-42.7.8.jar:/opt/hive/lib/postgres.jar
