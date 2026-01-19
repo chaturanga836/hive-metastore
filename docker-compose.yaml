@@ -2,6 +2,7 @@ services:
   # 1. Metadata Database
   metastore-db:
     image: postgres:15
+    container_name: hive-metastore-db
     environment:
       POSTGRES_DB: metastore_db
       POSTGRES_USER: postgres
