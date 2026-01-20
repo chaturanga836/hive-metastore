@@ -19,10 +19,22 @@ services:
     environment:
       SERVICE_NAME: "metastore"
       DB_DRIVER: "postgres"
-      # Connection to the Postgres DB above
+      HIVE_METASTORE_WAREHOUSE_DIR: "s3a://warehouse/"
+      
+      # Required for the Metastore to "talk" to MinIO
+      AWS_ACCESS_KEY_ID: "minioadmin"
+      AWS_SECRET_ACCESS_KEY: "minioadmin"
+      AWS_REGION: "us-east-1"
+      METASTORE_USE_S3: "true"
+      
+      # This points the Metastore to your MinIO container
+      HIVE_METASTORE_S3_ENDPOINT: "http://minio:9000"
+      HIVE_METASTORE_S3_PATH_STYLE_ACCESS: "true"
+      
+      # Connection to the Postgres DB
       SERVICE_OPTS: >-
         -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
-        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://metastore-db:5432/metastore_db
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db:5432/metastore_db
         -Djavax.jdo.option.ConnectionUserName=postgres
         -Djavax.jdo.option.ConnectionPassword=2324
     ports:
