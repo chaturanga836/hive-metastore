@@ -12,38 +12,34 @@ services:
 
   # 2. Hive Metastore (HMS)
   hive-metastore:
-    image: apache/hive:4.0.0
-    container_name: hive-metastore
-    depends_on:
-      - metastore-db
-    environment:
-      SERVICE_NAME: "metastore"
-      # DB Connection (Matches your previous success)
-      DB_DRIVER: "postgres"
-      SERVICE_OPTS: >-
-        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
-        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db:5432/metastore_db
-        -Djavax.jdo.option.ConnectionUserName=postgres
-        -Djavax.jdo.option.ConnectionPassword=2324
+      image: starburstdata/hive:3.1.2-e.18
+      container_name: hive-metastore
+      depends_on:
+        - metastore-db
+      environment:
+        # Database connection
+        HIVE_METASTORE_DRIVER: org.postgresql.Driver
+        HIVE_METASTORE_JDBC_URL: jdbc:postgresql://hive-metastore-db:5432/metastore
+        HIVE_METASTORE_USER: postgres
+        HIVE_METASTORE_PASSWORD: 2324
+        
+        # S3 / MinIO Configuration (Pre-configured in this image)
+        HIVE_METASTORE_WAREHOUSE_DIR: s3a://warehouse/
+        S3_ENDPOINT: http://minio:9000
+        S3_ACCESS_KEY: minioadmin
+        S3_SECRET_KEY: minioadmin
+        S3_PATH_STYLE_ACCESS: "true"
+        REGION: "us-east-1"
+        
+        # LDAP / SSL Support (Optional but recommended for your environment)
+        # If your LDAP requires a custom cert, you would add truststore opts here:
+        # JAVA_TOOL_OPTIONS: "-Djavax.net.ssl.trustStore=/opt/hive/conf/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
 
-      # --- S3 / MinIO Specific Config ---
-      HIVE_METASTORE_WAREHOUSE_DIR: "s3a://warehouse/"
-      METASTORE_USE_S3: "true"
-      # Use the MinIO container name if they are in the same network
-      S3_ENDPOINT: "http://minio:9000" 
-      S3_ACCESS_KEY: "minioadmin"
-      S3_SECRET_KEY: "minioadmin"
-      S3_PATH_STYLE_ACCESS: "true"
-      REGION: "us-east-1"
-    ports:
-      - "9083:9083"
-    volumes:
-      # You must provide the Postgres JDBC driver to the hive libs
-      # Or use a volume to persist the warehouse if not using S3/MinIO for all metadata
-      - ./lib/postgresql-42.7.8.jar:/opt/hive/lib/postgres.jar
-    networks:
-      - trino-ranger-net
-
+      ports:
+        - "9083:9083"
+      networks:
+        - trino-ranger-net
+        
 networks:
   trino-ranger-net:
     external: true
