@@ -30,7 +30,7 @@ services:
         S3_SECRET_KEY: minioadmin
         S3_PATH_STYLE_ACCESS: "true"
         REGION: "us-east-1"
-        
+        METASTORE_HADOOP_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
         # --- MANDATORY STARBURST PLACEHOLDERS (Do not remove) ---
         GOOGLE_CLOUD_KEY_FILE_PATH: ""
         AZURE_ADL_CLIENT_ID: ""
